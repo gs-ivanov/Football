@@ -1,0 +1,56 @@
+﻿@model IEnumerable<Team>
+@using Microsoft.AspNetCore.Authorization
+@using Tournament.Data.Models
+@inject IAuthorizationService AuthorizationService
+
+<h2>Списък на отборите</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Име</th>
+            <th>Град</th>
+            <th>Треньор</th>
+            <th>Точки</th>
+            <th>Победи</th>
+            <th>Загуби</th>
+            <th>Спечелени голове</th>
+            <th>Допуснати голове</th>
+            <th>Голова разлика</th>
+            @if (User.IsInRole("Administrator"))
+            {
+                <th>Действия</th>
+
+            }
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var team in Model)
+        {
+            <tr>
+                <td>@team.Name</td>
+                <td>@team.City</td>
+                <td>@team.Trener</td>
+                <td>@team.Points</td>
+                <td>@team.Wins</td>
+                <td>@team.Losts</td>
+                <td>@team.GoalsScored</td>
+                <td>@team.GoalsConceded</td>
+                <td>@team.GoalDifference</td>
+                @if (User.IsInRole("Administrator"))
+                {
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@team.Id">Редактиране</a> |
+                        <a asp-action="Delete" asp-route-id="@team.Id">Изтриване</a>
+                    </td>
+                }
+            </tr>
+        }
+    </tbody>
+</table>
+
+@if (User.IsInRole("Administrator"))
+{
+    <a asp-action="Create" class="btn btn-primary">Добави отбор</a>
+    <a asp-action="ResetSchedel" asp-route-id="" class="btn btn-danger"> Нулиране на графика !!! </a>}
+}

@@ -1,0 +1,40 @@
+﻿@model List<IndexModel>
+
+<h2>Списък на отборите</h2>
+
+<table class="table">
+        <thead>
+            <tr>
+                <th>Име</th>
+                <th>Град</th>
+                <th>Треньор</th>
+                <th>Победи</th>
+                <th>Загуби</th>
+                    @if (User.IsInRole("Administrator"))
+                    {
+                        <th>Действия</th>
+                    }
+            </tr>
+        </thead>
+        <tbody>
+                @foreach (var team in Model)
+                {
+                    <tr>
+                        <td>@team.Name</td>
+                        <td>@team.City</td>
+                        <td>@team.Trener</td>
+                        <td>@team.Wins</td>
+                        <td>@team.Losts</td>
+                            @if (User.IsInRole("Administrator"))
+                            {
+                                <td>
+                                <a asp-action="Edit" asp-route-id="@team.Id">Редактиране</a> |
+                                <a asp-action="Delete" asp-route-id="@team.Id">Изтриване</a>
+                                </td>
+                            }
+                    </tr>
+                }
+        </tbody>
+</table>
+
+    <a asp-action="Create" class="btn btn-primary">Добави отбор</a>
