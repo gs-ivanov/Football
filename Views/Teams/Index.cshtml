@@ -1,7 +1,13 @@
 ﻿@model IEnumerable<Team>
 @using Microsoft.AspNetCore.Authorization
 @using Tournament.Data.Models
+@using static Tournament.WebConstants
+
 @inject IAuthorizationService AuthorizationService
+
+
+<h5 class="text-black-10 text-center text-success"> @TempData[GlobalMessageKey]</h5>
+
 
 <h2>Списък на отборите</h2>
 
@@ -52,5 +58,4 @@
 @if (User.IsInRole("Administrator"))
 {
     <a asp-action="Create" class="btn btn-primary">Добави отбор</a>
-    <a asp-action="ResetSchedel" asp-route-id="" class="btn btn-danger"> Нулиране на графика !!! </a>}
 }
