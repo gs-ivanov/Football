@@ -30,14 +30,14 @@
             if (matchesExists.Count() > 0)
             {
                 TempData[GlobalMessageKey] = "График вече е създаден. Ако искаш нов график, избери 'Нулиране на графика'.";
-                return RedirectToAction("Index", "Teams");
+                return RedirectToAction(nameof(Index), "Teams");
             }
 
             var teams = data.Teams.ToList();
             if (teams.Count != 4)
             {
                 TempData[GlobalMessageKey] = "Трябва да има точно 4 отбора, за да се генерира график.";
-                return RedirectToAction("Index", "Teams");
+                return RedirectToAction(nameof(Index), "Teams");
             }
 
             List<Match> matches = new List<Match>();
@@ -57,7 +57,7 @@
             data.SaveChanges();
 
             TempData[GlobalMessageKey] = "Графикът е успешно генериран!";
-            
+
             return RedirectToAction(nameof(Index));
         }
 
@@ -88,7 +88,8 @@
             if (matchesExists.Count() == 0)
             {
                 TempData[GlobalMessageKey] = "Графика вече е нулиран. Ако искаш нов график, избери 'Generate Schedule'.";
-                return RedirectToAction("Index", "Teams");
+
+                return RedirectToAction(nameof(Index), "Teams");
             }
             var match = this.data.Matches
                 .Where(m => m.Id > 0)
@@ -178,11 +179,44 @@
                 return NotFound();
             }
 
+            var errSrc = $"{match.MatchDate} {existingMatch.HomeTeam.Name} vs  {existingMatch.AwayTeam.Name}";
+
+            // 1. Забраняваме повторното задаване на резултат
+            if (existingMatch.HomeTeamGoals.HasValue || existingMatch.AwayTeamGoals.HasValue)
+            {
+                TempData[GlobalMessageKey] = $"Резултатът вече е въведен и не може да се променя {errSrc}.";
+
+                return RedirectToAction(nameof(Index));
+
+            }
+
+            // 2. Проверяваме дали има мачове с по-ранна дата, които нямат въведен резултат
+            bool hasUnfinishedMatches = await this.data.Matches
+                .AnyAsync(m => m.MatchDate < match.MatchDate && (!m.HomeTeamGoals.HasValue || !m.AwayTeamGoals.HasValue));
+
+            if (hasUnfinishedMatches)
+            {
+                TempData[GlobalMessageKey] = $"Не можете да въвеждате резултат за този кръг: {errSrc}, докато предходният не е завършен.";
+
+                return RedirectToAction(nameof(Index));
+            }
+
+
+
             // Проверка дали резултатът вече е въведен
             if (existingMatch.HomeTeamGoals != null || existingMatch.AwayTeamGoals != null)
             {
-                ModelState.AddModelError("", "Резултатът вече е въведен и не може да бъде редактиран.");
-                return View(match);
+                TempData[GlobalMessageKey] = $"Резултатът вече е въведен и не може да бъде редактиран ({errSrc}).";
+
+                return RedirectToAction(nameof(Index));
+            }
+
+            // Проверка дали резултатът не е null
+            if (match.HomeTeamGoals == null || match.AwayTeamGoals == null || match.HomeTeamGoals < 0 || match.AwayTeamGoals < 0)
+            {
+                TempData[GlobalMessageKey] = $"Резултатът не може да бъде различен от число нула или по-голямо ({errSrc}).";
+
+                return RedirectToAction(nameof(Index));
             }
 
             if (ModelState.IsValid)
@@ -209,8 +243,10 @@
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
+
+                return RedirectToAction(nameof(Index), "Teams");
             }
+
             return View(match);
         }
 
@@ -260,35 +296,5 @@
             this.data.Teams.Update(homeTeam);
             this.data.Teams.Update(awayTeam);
         }
-
-
-        //private void UpdateNewMatchStats(Match match, Team homeTeam, Team awayTeam)
-        //{
-        //    if ((int)match.HomeTeamGoals > (int)match.AwayTeamGoals)
-        //    {
-        //        homeTeam.Wins++;
-        //        awayTeam.Losts++;
-        //        homeTeam.Points += 2;
-        //    }
-        //    else if ((int)match.HomeTeamGoals < (int)match.AwayTeamGoals)
-        //    {
-        //        awayTeam.Wins++;
-        //        homeTeam.Losts++;
-        //        awayTeam.Points += 2;
-        //    }
-        //    else
-        //    {
-        //        homeTeam.Draws++;
-        //        awayTeam.Draws++;
-        //        homeTeam.Points += 1;
-        //        awayTeam.Points += 1;
-        //    }
-
-        //    homeTeam.GoalsScored += (int)match.HomeTeamGoals;
-        //    homeTeam.GoalsConceded += (int)match.AwayTeamGoals;
-        //    awayTeam.GoalsScored += (int)match.AwayTeamGoals;
-        //    awayTeam.GoalsConceded += (int)match.HomeTeamGoals;
-        //}
-
     }
 }

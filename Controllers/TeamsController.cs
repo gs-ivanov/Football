@@ -20,7 +20,10 @@
 
         public async Task<IActionResult> Index()
         {
-            var teams = await data.Teams.OrderByDescending(t => t.Points).ToListAsync();
+            var teams = await data.Teams
+                .OrderByDescending(t => t.Points)
+                .ThenByDescending(t=>t.GoalsScored)
+                .ToListAsync();
             return View(teams);
         }
 

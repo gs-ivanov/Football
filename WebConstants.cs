@@ -5,5 +5,7 @@
         public const string AdministratorRoleName = "Administrator";
 
         public const string GlobalMessageKey = "GlobalMessage";
+
+        public const string GlobalKeyMatches = "MatchesMessage";
     }
 }
