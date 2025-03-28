@@ -9,3 +9,17 @@ public IActionResult Edit(int id)
     // Логика за редактиране на мач
     return View();
 }
+    // Тест на БД
+            var match = new Match
+            {
+                HomeTeamId = 1,
+                AwayTeamId = 2,
+                MatchDate = DateTime.Now,
+                HomeTeamGoals = null,  // Без резултат
+                AwayTeamGoals = null   // Без резултат
+            };
+
+            this.data.Matches.Add(match);
+            this.data.SaveChanges();
+****************
+           

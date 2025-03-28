@@ -22,6 +22,7 @@
 
         public IActionResult GenerateSchedule()
         {
+
             var matchesExists = data.Matches.ToList();
 
             if (matchesExists.Count() > 0)
@@ -54,6 +55,7 @@
             data.SaveChanges();
 
             TempData[GlobalMessageKey] = "Графикът е успешно генериран!";
+            
             return RedirectToAction(nameof(Index));
         }
 
@@ -66,8 +68,8 @@
                     Id = m.Id,
                     HomeTeam = m.HomeTeam.Name,
                     AwayTeam = m.AwayTeam.Name,
-                    HomeTeamGoals = m.HomeTeamGoals,
-                    AwayTeamGoals = m.AwayTeamGoals,
+                    HomeTeamGoals = (int)m.HomeTeamGoals,
+                    AwayTeamGoals = (int)m.AwayTeamGoals,
                     MatchDate = m.MatchDate
                 })
                 .ToList();
@@ -138,8 +140,8 @@
                     HomeTeam = m.HomeTeam.Name,
                     AwayTeam = m.AwayTeam.Name,
                     MatchDate = m.MatchDate,
-                    HomeTeamGoals = m.HomeTeamGoals,
-                    AwayTeamGoals = m.AwayTeamGoals
+                    HomeTeamGoals = (int)m.HomeTeamGoals,
+                    AwayTeamGoals = (int)m.AwayTeamGoals
                 })
                 .FirstOrDefault();
 
@@ -194,13 +196,13 @@
 
         private void RemoveOldMatchStats(Match match, Team homeTeam, Team awayTeam)
         {
-            if (match.HomeTeamGoals > match.AwayTeamGoals)
+            if ((match.HomeTeamGoals == null ? 0 : match.HomeTeamGoals) > (match.AwayTeamGoals == null ? 0 : match.AwayTeamGoals))
             {
                 if (homeTeam.Wins > 0) homeTeam.Wins--;
                 if (awayTeam.Losts > 0) awayTeam.Losts--;
                 if (homeTeam.Points >= 2) homeTeam.Points -= 2;
             }
-            else if (match.HomeTeamGoals < match.AwayTeamGoals)
+            else if ((match.HomeTeamGoals == null ? 0 : match.HomeTeamGoals) < (match.AwayTeamGoals == null ? 0 : match.AwayTeamGoals))
             {
                 if (awayTeam.Wins > 0) awayTeam.Wins--;
                 if (homeTeam.Losts > 0) homeTeam.Losts--;
@@ -214,21 +216,21 @@
                 if (awayTeam.Points >= 1) awayTeam.Points -= 1;
             }
 
-            homeTeam.GoalsScored -= match.HomeTeamGoals;
-            homeTeam.GoalsConceded -= match.AwayTeamGoals;
-            awayTeam.GoalsScored -= match.AwayTeamGoals;
-            awayTeam.GoalsConceded -= match.HomeTeamGoals;
+            homeTeam.GoalsScored -= (int)match.HomeTeamGoals;
+            homeTeam.GoalsConceded -= (int)match.AwayTeamGoals;
+            awayTeam.GoalsScored -= (int)match.AwayTeamGoals;
+            awayTeam.GoalsConceded -= (int)match.HomeTeamGoals;
         }
 
         private void UpdateNewMatchStats(Match match, Team homeTeam, Team awayTeam)
         {
-            if (match.HomeTeamGoals > match.AwayTeamGoals)
+            if ((int)match.HomeTeamGoals > (int)match.AwayTeamGoals)
             {
                 homeTeam.Wins++;
                 awayTeam.Losts++;
                 homeTeam.Points += 2;
             }
-            else if (match.HomeTeamGoals < match.AwayTeamGoals)
+            else if ((int)match.HomeTeamGoals < (int)match.AwayTeamGoals)
             {
                 awayTeam.Wins++;
                 homeTeam.Losts++;
@@ -242,10 +244,10 @@
                 awayTeam.Points += 1;
             }
 
-            homeTeam.GoalsScored += match.HomeTeamGoals;
-            homeTeam.GoalsConceded += match.AwayTeamGoals;
-            awayTeam.GoalsScored += match.AwayTeamGoals;
-            awayTeam.GoalsConceded += match.HomeTeamGoals;
+            homeTeam.GoalsScored += (int)match.HomeTeamGoals;
+            homeTeam.GoalsConceded += (int)match.AwayTeamGoals;
+            awayTeam.GoalsScored += (int)match.AwayTeamGoals;
+            awayTeam.GoalsConceded += (int)match.HomeTeamGoals;
         }
 
     }
