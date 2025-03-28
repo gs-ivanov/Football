@@ -11,7 +11,7 @@
 
 <h2>Списък на отборите</h2>
 
-<table class="table">
+<table class="table table-striped">
     <thead>
         <tr>
             <th>Име</th>
@@ -20,6 +20,7 @@
             <th>Точки</th>
             <th>Победи</th>
             <th>Загуби</th>
+            <th>Draws</th>
             <th>Спечелени голове</th>
             <th>Допуснати голове</th>
             <th>Голова разлика</th>
@@ -33,24 +34,29 @@
     <tbody>
         @foreach (var team in Model)
         {
-            <tr>
-                <td>@team.Name</td>
-                <td>@team.City</td>
-                <td>@team.Trener</td>
-                <td>@team.Points</td>
-                <td>@team.Wins</td>
-                <td>@team.Losts</td>
-                <td>@team.GoalsScored</td>
-                <td>@team.GoalsConceded</td>
-                <td>@team.GoalDifference</td>
-                @if (User.IsInRole("Administrator"))
-                {
-                    <td>
-                        <a asp-action="Edit" asp-route-id="@team.Id">Редактиране</a> |
-                        <a asp-action="Delete" asp-route-id="@team.Id">Изтриване</a>
-                    </td>
-                }
-            </tr>
+        <tr>
+            <td>@team.Name</td>
+            <td>@team.City</td>
+            <td>@team.Trener</td>
+            <td>@team.Points</td>
+            <td>@team.Wins</td>
+            <td>@team.Losts</td>
+            <td>@team.Draws</td>
+            <td>@team.GoalsScored</td>
+            <td>@team.GoalsConceded</td>
+            <td>@team.GoalDifference</td>
+            @if (User.IsInRole("Administrator"))
+            {
+                <td>
+                    <a href="@Url.Action("Edit", "Teams", new { id = team.Id })" class="btn btn-primary">Редактиране</a>
+                    <a href="@Url.Action("Delete", "Teams", new { id = team.Id })" class="btn btn-danger">Изтриване</a>
+                </td>
+                @*<td>
+                <a asp-action="Edit" asp-route-id="@team.Id">Редактиране</a> |
+                <a asp-action="Delete" asp-route-id="@team.Id">Изтриване</a>
+            </td>*@
+            }
+        </tr>
         }
     </tbody>
 </table>

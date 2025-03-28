@@ -1,0 +1,11 @@
+﻿[Authorize]
+public IActionResult Edit(int id)
+{
+    if (!User.IsAdmin() && !User.IsEditor())
+    {
+        return Unauthorized();
+    }
+
+    // Логика за редактиране на мач
+    return View();
+}

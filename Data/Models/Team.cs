@@ -27,7 +27,7 @@
 
         public int GoalsScored { get; set; }
         public int GoalsConceded { get; set; }
-        public int Points { get; set; } = 0; // Начална стойност
+        public int Points { get; set; }
 
         public int GoalDifference => GoalsScored - GoalsConceded;
 
