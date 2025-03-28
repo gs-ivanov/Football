@@ -2,9 +2,11 @@
 {
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
+    using Microsoft.EntityFrameworkCore;
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading.Tasks;
     using Tournament.Data;
     using Tournament.Data.Models;
     using Tournament.Models.Matches;
@@ -154,83 +156,94 @@
         }
 
 
-        [HttpPost, ActionName("Edit")]
-        [Authorize(Roles = "Administrator")]
-        public IActionResult EditMatches(int id, MatchFormModel match)
+        //[HttpPost, ActionName("Edit")]
+        //[Authorize(Roles = "Administrator")]
+        //public IActionResult EditMatches(int id, MatchFormModel match)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, [Bind("Id,HomeTeamId,AwayTeamId,MatchDate,HomeTeamGoals,AwayTeamGoals")] Match match)
         {
-            if (!ModelState.IsValid)
+            if (id != match.Id)
             {
+                return NotFound();
+            }
+
+            var existingMatch = await data.Matches
+                .Include(m => m.HomeTeam)
+                .Include(m => m.AwayTeam)
+                .FirstOrDefaultAsync(m => m.Id == id);
+
+            if (existingMatch == null)
+            {
+                return NotFound();
+            }
+
+            // Проверка дали резултатът вече е въведен
+            if (existingMatch.HomeTeamGoals != null || existingMatch.AwayTeamGoals != null)
+            {
+                ModelState.AddModelError("", "Резултатът вече е въведен и не може да бъде редактиран.");
                 return View(match);
             }
 
-            var matchData = this.data.Matches.FirstOrDefault(m => m.Id == id);
-            if (matchData == null)
+            if (ModelState.IsValid)
             {
-                return NotFound();
-            }
+                try
+                {
+                    // Запазване на резултатите в мача
+                    existingMatch.HomeTeamGoals = match.HomeTeamGoals;
+                    existingMatch.AwayTeamGoals = match.AwayTeamGoals;
 
-            // Взимаме отборите по Id
-            var homeTeam = this.data.Teams.FirstOrDefault(t => t.Id == matchData.HomeTeamId);
-            var awayTeam = this.data.Teams.FirstOrDefault(t => t.Id == matchData.AwayTeamId);
+                    // Актуализиране на статистиките на отборите
+                    UpdateTeamStats(existingMatch);
+
+                    await data.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!MatchExists(match.Id))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+                return RedirectToAction(nameof(Index));
+            }
+            return View(match);
+        }
+
+        private bool MatchExists(int id)
+        {
+            return this.data.Matches.Any(m => m.Id == id);
+        }
+
+
+        private void UpdateTeamStats(Match match)
+        {
+            var homeTeam = match.HomeTeam;
+            var awayTeam = match.AwayTeam;
 
             if (homeTeam == null || awayTeam == null)
             {
-                return NotFound();
+                return;
             }
 
-            // 🔹 Премахване на старите резултати от статистиките
-            RemoveOldMatchStats(matchData, homeTeam, awayTeam);
+            // Обновяване на головете
+            homeTeam.GoalsScored += match.HomeTeamGoals ?? 0;
+            homeTeam.GoalsConceded += match.AwayTeamGoals ?? 0;
+            awayTeam.GoalsScored += match.AwayTeamGoals ?? 0;
+            awayTeam.GoalsConceded += match.HomeTeamGoals ?? 0;
 
-            // 🔹 Запазване на новите резултати
-            matchData.HomeTeamGoals = match.HomeTeamGoals;
-            matchData.AwayTeamGoals = match.AwayTeamGoals;
-            matchData.MatchDate = match.MatchDate;
-
-            // 🔹 Актуализиране на статистиката за новия резултат
-            UpdateNewMatchStats(matchData, homeTeam, awayTeam);
-
-            this.data.SaveChanges();
-
-            return RedirectToAction(nameof(Index));
-        }
-
-        private void RemoveOldMatchStats(Match match, Team homeTeam, Team awayTeam)
-        {
-            if ((match.HomeTeamGoals == null ? 0 : match.HomeTeamGoals) > (match.AwayTeamGoals == null ? 0 : match.AwayTeamGoals))
-            {
-                if (homeTeam.Wins > 0) homeTeam.Wins--;
-                if (awayTeam.Losts > 0) awayTeam.Losts--;
-                if (homeTeam.Points >= 2) homeTeam.Points -= 2;
-            }
-            else if ((match.HomeTeamGoals == null ? 0 : match.HomeTeamGoals) < (match.AwayTeamGoals == null ? 0 : match.AwayTeamGoals))
-            {
-                if (awayTeam.Wins > 0) awayTeam.Wins--;
-                if (homeTeam.Losts > 0) homeTeam.Losts--;
-                if (awayTeam.Points >= 2) awayTeam.Points -= 2;
-            }
-            else
-            {
-                if (homeTeam.Draws > 0) homeTeam.Draws--;
-                if (awayTeam.Draws > 0) awayTeam.Draws--;
-                if (homeTeam.Points >= 1) homeTeam.Points -= 1;
-                if (awayTeam.Points >= 1) awayTeam.Points -= 1;
-            }
-
-            homeTeam.GoalsScored -= (int)match.HomeTeamGoals;
-            homeTeam.GoalsConceded -= (int)match.AwayTeamGoals;
-            awayTeam.GoalsScored -= (int)match.AwayTeamGoals;
-            awayTeam.GoalsConceded -= (int)match.HomeTeamGoals;
-        }
-
-        private void UpdateNewMatchStats(Match match, Team homeTeam, Team awayTeam)
-        {
-            if ((int)match.HomeTeamGoals > (int)match.AwayTeamGoals)
+            // Определяне на резултата и актуализиране на класирането
+            if (match.HomeTeamGoals > match.AwayTeamGoals)
             {
                 homeTeam.Wins++;
                 awayTeam.Losts++;
                 homeTeam.Points += 2;
             }
-            else if ((int)match.HomeTeamGoals < (int)match.AwayTeamGoals)
+            else if (match.HomeTeamGoals < match.AwayTeamGoals)
             {
                 awayTeam.Wins++;
                 homeTeam.Losts++;
@@ -244,11 +257,38 @@
                 awayTeam.Points += 1;
             }
 
-            homeTeam.GoalsScored += (int)match.HomeTeamGoals;
-            homeTeam.GoalsConceded += (int)match.AwayTeamGoals;
-            awayTeam.GoalsScored += (int)match.AwayTeamGoals;
-            awayTeam.GoalsConceded += (int)match.HomeTeamGoals;
+            this.data.Teams.Update(homeTeam);
+            this.data.Teams.Update(awayTeam);
         }
+
+
+        //private void UpdateNewMatchStats(Match match, Team homeTeam, Team awayTeam)
+        //{
+        //    if ((int)match.HomeTeamGoals > (int)match.AwayTeamGoals)
+        //    {
+        //        homeTeam.Wins++;
+        //        awayTeam.Losts++;
+        //        homeTeam.Points += 2;
+        //    }
+        //    else if ((int)match.HomeTeamGoals < (int)match.AwayTeamGoals)
+        //    {
+        //        awayTeam.Wins++;
+        //        homeTeam.Losts++;
+        //        awayTeam.Points += 2;
+        //    }
+        //    else
+        //    {
+        //        homeTeam.Draws++;
+        //        awayTeam.Draws++;
+        //        homeTeam.Points += 1;
+        //        awayTeam.Points += 1;
+        //    }
+
+        //    homeTeam.GoalsScored += (int)match.HomeTeamGoals;
+        //    homeTeam.GoalsConceded += (int)match.AwayTeamGoals;
+        //    awayTeam.GoalsScored += (int)match.AwayTeamGoals;
+        //    awayTeam.GoalsConceded += (int)match.HomeTeamGoals;
+        //}
 
     }
 }
