@@ -19,13 +19,7 @@
         [Required]
         public string Trener { get; init; }
 
-        //[Required]
-        //[Display(Name = "Winning points:")]
-        //public int Wins { get; init; } = 0;
-
-        //[Required]
-        //[Display(Name = "Lost points:")]
-        //public int Losts { get; init; } = 0;
+        public int TeamCount { get; init; }
 
     }
 }

@@ -11,6 +11,7 @@
         public string Name { get; set; }
         public string City { get; set; }
         public string Trener { get; set; }
+        public int Points { get; set; }
         public int Wins { get; set; }
         public int Losts { get; set; }
         public int Draws { get; set; }

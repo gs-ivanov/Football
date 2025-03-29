@@ -22,6 +22,86 @@
             data = context;
         }
 
+        public IActionResult GenerateKnockoutMatches()
+        {
+
+            var matchesExists = data.Matches.ToList();
+
+            if (matchesExists.Count() > 0)
+            {
+                TempData[GlobalMessageKey] = "График вече е създаден. Ако искаш нов график, избери 'Нулиране на график - 'Елемениране'.";
+                return RedirectToAction(nameof(Index), "Teams");
+            }
+
+            var teams = data.Teams.ToList();
+            if (teams.Count%2 != 0)
+            {
+                TempData[GlobalMessageKey] = "Броят на отборите трябва да е степен на 2 (например 4, 8, 16).";
+                return RedirectToAction(nameof(Index), "Teams");
+            }
+
+            List<Match> matches = new List<Match>();
+            Random rand = new ();
+
+            // Разбъркваме отборите за случайни двойки
+            teams = teams.OrderBy(t => rand.Next()).ToList();
+
+            for (int i = 0; i < teams.Count; i += 2)
+            {
+                matches.Add(new Match
+                {
+                    HomeTeamId = teams[i].Id,
+                    AwayTeamId = teams[i + 1].Id,
+                    MatchDate = DateTime.Now.AddDays(i), // Примерна дата
+                    HomeTeamGoals = null,
+                    AwayTeamGoals = null
+                });
+            }
+
+
+            data.Matches.AddRange(matches);
+            data.SaveChanges();
+
+            TempData[GlobalMessageKey] = "Графикът е успешно генериран!";
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        public IActionResult GenerateEliminationBracket()
+        {
+            var teams = data.Teams.ToList();
+
+            if (teams.Count != 8)
+            {
+                TempData[GlobalMessageKey] = "Броят на отборите трябва да е 8.";// степен на 2 (например 4, 8, 16).";
+                return RedirectToAction(nameof(Index), "Teams");
+            }
+
+            // Разбъркване на отборите на случаен принцип
+            var random = new Random();
+            teams = teams.OrderBy(t => random.Next()).ToList();
+
+            // Създаване на мачовете за четвъртфиналите
+            List<Match> matches = new List<Match>();
+            for (int i = 0; i < teams.Count; i += 2)
+            {
+                matches.Add(new Match
+                {
+                    HomeTeamId = teams[i].Id,
+                    AwayTeamId = teams[i + 1].Id,
+                    MatchDate = DateTime.Now.AddDays(7), // Първият кръг е след 7 дни
+                    HomeTeamGoals = null,
+                    AwayTeamGoals = null
+                });
+            }
+
+            data.Matches.AddRange(matches);
+            data.SaveChanges();
+
+            return RedirectToAction(nameof(Index));
+        }
+
+
         public IActionResult GenerateSchedule()
         {
 
@@ -60,6 +140,8 @@
 
             return RedirectToAction(nameof(Index));
         }
+
+
 
         public IActionResult Index()
         {
@@ -132,7 +214,7 @@
 
         }
 
-        [Authorize(Roles = "Administrator")]
+        [Authorize(Roles = "Editor")]
         public IActionResult Edit(int id)
         {
             var match = data.Matches
@@ -158,10 +240,10 @@
 
 
         //[HttpPost, ActionName("Edit")]
-        //[Authorize(Roles = "Administrator")]
         //public IActionResult EditMatches(int id, MatchFormModel match)
         [HttpPost]
-        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Editor")]
+        //[ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,HomeTeamId,AwayTeamId,MatchDate,HomeTeamGoals,AwayTeamGoals")] Match match)
         {
             if (id != match.Id)
@@ -277,13 +359,13 @@
             {
                 homeTeam.Wins++;
                 awayTeam.Losts++;
-                homeTeam.Points += 2;
+                homeTeam.Points += 3;
             }
             else if (match.HomeTeamGoals < match.AwayTeamGoals)
             {
                 awayTeam.Wins++;
                 homeTeam.Losts++;
-                awayTeam.Points += 2;
+                awayTeam.Points += 3;
             }
             else
             {

@@ -45,6 +45,10 @@
             <td>@team.GoalsScored</td>
             <td>@team.GoalsConceded</td>
             <td>@team.GoalDifference</td>
+            <td>
+                <a asp-controller="Teams" asp-action="Details" asp-route-id="@team.Id" class="btn btn-info btn-sm">Статистика</a>
+            </td>
+
             @if (User.IsInRole("Administrator"))
             {
                 <td>

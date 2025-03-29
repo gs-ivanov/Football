@@ -25,7 +25,7 @@
                 <td>@match.HomeTeamGoals : @match.AwayTeamGoals</td>
                 <td>@match.AwayTeam</td>
                 <td>
-                    @if (User.IsInRole("Administrator"))
+                    @if (User.IsInRole("Editor"))
                     {
                         <a asp-action="Edit" asp-route-id="@match.Id" class="btn btn-warning btn-sm">Редактирай</a>
                     }
