@@ -13,13 +13,9 @@
         public string Name { get; set; }
 
         [Required]
-        [StringLength(CityMaxLength, MinimumLength = CityMinLength)]
-        public string City { get; set; }
+        public string Logo { get; set; }
 
-        [Required]
-        [StringLength(50)]
-        [Display(Name = "Trener")]
-        public string Trener { get; set; }
+        public bool IsActive { get; set; }
 
         public int Wins { get; set; }
         public int Losts { get; set; }
@@ -28,6 +24,7 @@
         public int GoalsScored { get; set; }
         public int GoalsConceded { get; set; }
         public int Points { get; set; }
+        public int MatchNumbers { get; set; }
 
         public int GoalDifference => GoalsScored - GoalsConceded;
 

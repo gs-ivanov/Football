@@ -6,6 +6,8 @@
 
         public const string GlobalMessageKey = "GlobalMessage";
 
+        public const string GlobalKeySuccess = "SuccessMessage";
+
         public const string GlobalKeyMatches = "MatchesMessage";
     }
 }

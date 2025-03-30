@@ -12,13 +12,7 @@
         [StringLength(NameMaxLength, MinimumLength = NameMinLength)]
         public string Name { get; init; }
 
-        [Required]
-        [StringLength(CityMaxLength, MinimumLength = CityMinLength)]
-        public string City { get; init; }
-
-        [Required]
-        public string Trener { get; init; }
-
+        [Display(Name="Брой на отборите в новия списък.")]
         public int TeamCount { get; init; }
 
     }
