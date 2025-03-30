@@ -4,32 +4,24 @@
     ViewData["Title"] = "Статистика на отбора";
 }
 
-<h2>@Model.Name - Статистика</h2>
+<h1><a asp-controller="Teams" asp-action="Index" class="btn btn-info btn-link"><img class="d-block w-100" src=@Model.Logo></a>  @Model.Name - Статистика</h1>
 
 <table class="table table-bordered">
     <tr>
-        <th>Град</th>
-        <td>@Model.City</td>
-    </tr>
-    <tr>
-        <th>Треньор</th>
-        <td>@Model.Trener</td>
-    </tr>
-    <tr>
-        <th>Точки</th>
-        <td>@Model.Points</td>
+        <th>Изиграни мачове</th>
+        <td>@Model.MatchNumbers</td>
     </tr>
     <tr>
         <th>Победи</th>
         <td>@Model.Wins</td>
     </tr>
     <tr>
-        <th>Загуби</th>
-        <td>@Model.Losts</td>
-    </tr>
-    <tr>
         <th>Равни</th>
         <td>@Model.Draws</td>
+    </tr>
+    <tr>
+        <th>Загуби</th>
+        <td>@Model.Losts</td>
     </tr>
     <tr>
         <th>Вкарани голове</th>
@@ -42,6 +34,10 @@
     <tr>
         <th>Голова разлика</th>
         <td>@Model.GoalDifference</td>
+    </tr>
+    <tr>
+        <th>Точки</th>
+        <td>@Model.Points</td>
     </tr>
 </table>
 

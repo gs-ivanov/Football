@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Tournament.Data;
 
 namespace Tournament.Migrations
 {
     [DbContext(typeof(TurnirDbContext))]
-    partial class TurnirDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250329185101_AddMatchNumbersToTeamsTable")]
+    partial class AddMatchNumbersToTeamsTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

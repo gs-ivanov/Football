@@ -34,14 +34,14 @@
             }
 
             var teams = data.Teams.ToList();
-            if (teams.Count%2 != 0)
+            if (teams.Count % 2 != 0)
             {
                 TempData[GlobalMessageKey] = "Броят на отборите трябва да е степен на 2 (например 4, 8, 16).";
                 return RedirectToAction(nameof(Index), "Teams");
             }
 
             List<Match> matches = new List<Match>();
-            Random rand = new ();
+            Random rand = new();
 
             // Разбъркваме отборите за случайни двойки
             teams = teams.OrderBy(t => rand.Next()).ToList();
@@ -114,9 +114,9 @@
             }
 
             var teams = data.Teams.ToList();
-            if (teams.Count != 4)
+            if (teams.Count < 4)
             {
-                TempData[GlobalMessageKey] = "Трябва да има точно 4 отбора, за да се генерира график.";
+                TempData[GlobalMessageKey] = "Трябва да има най-малко 4 отбора, за да се генерира график.";
                 return RedirectToAction(nameof(Index), "Teams");
             }
 
@@ -129,8 +129,8 @@
                 {
                     matches.Add(new Match { HomeTeamId = teams[i].Id, AwayTeamId = teams[j].Id, MatchDate = startDate });
                     matches.Add(new Match { HomeTeamId = teams[j].Id, AwayTeamId = teams[i].Id, MatchDate = startDate });
-                    startDate = startDate.AddDays(7);
                 }
+                    startDate = startDate.AddDays(7);
             }
 
             data.Matches.AddRange(matches);
@@ -165,22 +165,18 @@
         [Authorize(Roles = "Administrator")]
         public IActionResult Reset()
         {
+            var teamsExists = data.Teams.ToList();
             var matchesExists = data.Matches.ToList();
 
-            if (matchesExists.Count() == 0)
+            if (matchesExists.Count == 0 && teamsExists.Count == 0)
             {
-                TempData[GlobalMessageKey] = "Графика вече е нулиран. Ако искаш нов график, избери 'Generate Schedule'.";
+                TempData[GlobalMessageKey] = "Графика вече e нулиран. Ако искаш нов график, избери 'Settings ...'.";
 
                 return RedirectToAction(nameof(Index), "Teams");
             }
-            var match = this.data.Matches
-                .Where(m => m.Id > 0)
-                .Select(m => m.HomeTeam.Name)
-                .FirstOrDefault();
 
-            if (match == null) return NotFound();
+            string mesage = "READY TO REMOVE ALL RECORDS IN MATCHES TABLE!!!";
 
-            string mesage = "Ready to RESET schedule!";
             ViewBag.Msg = mesage;
             return View();
         }
@@ -190,24 +186,11 @@
         public IActionResult ResetConfirmed()
         {
             List<Match> itemsToDelete = this.data.Matches.ToList();
+
             this.data.Matches.RemoveRange(itemsToDelete);
             this.data.SaveChanges();
 
-            // Нулиране на статистиките на отборите
-            var teams = this.data.Teams.ToList();
-            foreach (var team in teams)
-            {
-                team.Points = 0;
-                team.Wins = 0;
-                team.Losts = 0;
-                team.Draws = 0;  // Нулиране на равните мачове
-                team.GoalsScored = 0;
-                team.GoalsConceded = 0;
-            }
-
-            this.data.SaveChanges();
-
-            TempData[GlobalMessageKey] = "Графикът и статистиките са нулирани. За нов график - избери 'Generate Schedule'.";
+            TempData[GlobalMessageKey] = "Графикът e нулиран. За нов график - избери 'Generate Schedule'.";
 
             //return RedirectToAction(nameof(AllTeams));
             return RedirectToAction("Index", "Teams");
@@ -351,8 +334,10 @@
             // Обновяване на головете
             homeTeam.GoalsScored += match.HomeTeamGoals ?? 0;
             homeTeam.GoalsConceded += match.AwayTeamGoals ?? 0;
+            homeTeam.MatchNumbers ++;
             awayTeam.GoalsScored += match.AwayTeamGoals ?? 0;
             awayTeam.GoalsConceded += match.HomeTeamGoals ?? 0;
+            awayTeam.MatchNumbers++;
 
             // Определяне на резултата и актуализиране на класирането
             if (match.HomeTeamGoals > match.AwayTeamGoals)

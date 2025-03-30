@@ -27,31 +27,43 @@
                         </li>
                         @if (User.IsInRole("Administrator"))
                         {
-                                <div class="btn-group" role="group">
-                                    <button id="btnGroupDrop1" type="button" class="btn btn-secondary dropdown-toggle bg-light text-danger" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                        Settings
-                                    </button>
-                                    <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
-                                <li class="nav-item">
-                                    <a class="dropdown-item bg-info" asp-area="" asp-controller="Matches" asp-action="GenerateSchedule">Създаване на нов турнир - Всеки с/у всеки </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="dropdown-item bg-danger" asp-area="" asp-controller="Matches" asp-action="Reset">Нулиране на турнир - Всеки с/у всеки  </a>
-                                </li>
+                            <div class="btn-group" role="group">
+                                <button id="btnGroupDrop1" type="button" class="btn btn-secondary dropdown-toggle bg-light text-danger" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Settings
+                                </button>
+                                <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+                            <li class="nav-item">
+                                <a class="dropdown-item bg-white" asp-area="" asp-controller="">Настройки отбори...</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="dropdown-item bg-info" asp-area="" asp-controller="Teams" asp-action="CreateMultiple">Създаване на нов списък с отбори (дефолтен). </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="dropdown-item bg-danger" asp-area="" asp-controller="Teams" asp-action="Reset">Изтриване записите в списъка с отборите </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="dropdown-item bg-white" asp-area="" asp-controller="">Настройки графици...</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="dropdown-item bg-info" asp-area="" asp-controller="Matches" asp-action="GenerateSchedule">Създаване на нов турнир - Всеки с/у всеки </a>
+                            </li>
 
-                                <li class="nav-item">
-                                    <a class="dropdown-item bg-info" asp-area="" asp-controller="Matches" asp-action="GenerateKnockoutMatches">Създаване на нов турнир - 'Елеменация' </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="dropdown-item bg-info" asp-area="" asp-controller="Matches" asp-action="GenerateEliminationBracket">Създаване на нов елиминационният турнир(или „knockout“ формат). </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="dropdown-item bg-white" asp-area="" asp-controller="">-------------------------------------</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link text-black bg-info" asp-area="" asp-controller="Teams" asp-action="CreateMultiple">Genirate Teams</a>
-                                </li>
-            </div>
+                            <li class="nav-item">
+                                <a class="dropdown-item bg-danger" asp-area="" asp-controller="Matches" asp-action="Reset">Нулиране на турнир - Всеки с/у всеки  </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="dropdown-item bg-info" asp-area="" asp-controller="Matches" asp-action="GenerateKnockoutMatches">Създаване на нов турнир - 'Елеменация' </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="dropdown-item bg-info" asp-area="" asp-controller="Matches" asp-action="GenerateEliminationBracket">Създаване на нов елиминационният турнир(или „knockout“ формат). </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="dropdown-item bg-white" asp-area="" asp-controller="">-------------------------------------</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-black bg-info" asp-area="" asp-controller="Teams" asp-action="CreateMultiple">Genirate Teams</a>
+                            </li>
+</div>
                          </div>
                          }
                     </ul>
